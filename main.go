@@ -1,17 +1,27 @@
 package main
 
 import (
-	"net/http"
+	"GolangValdezApi/databasecon"
+	"fmt"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	_ "github.com/go-sql-driver/mysql"
 )
 
+// "net/http"
+// "database/sql"
+// "github.com/go-chi/chi"
+// "github.com/go-chi/chi/middleware"
+
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
-	http.ListenAndServe(":3000", r)
+
+	dbco := databasecon.InitDB()
+	defer dbco.Close()
+	fmt.Println(dbco)
+
+	// r := chi.NewRouter()
+	// r.Use(middleware.Logger)
+	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Write([]byte("welcome"))
+	// })
+	// http.ListenAndServe(":3000", r)
 }
