@@ -1,27 +1,33 @@
 package main
 
 import (
-	"GolangValdezApi/databasecon"
-	"fmt"
+	"database/sql"
+	"net/http"
 
+	"github.com/GolangValdezApi/databasecon"
+	"github.com/GolangValdezApi/product"
+	"github.com/go-chi/chi"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// "net/http"
-// "database/sql"
-// "github.com/go-chi/chi"
-// "github.com/go-chi/chi/middleware"
+//Product estructura
+type Product struct {
+	ID          int    `json:"id"`
+	ProductCode string `json:"productcode"`
+	Description string `json:"description"`
+}
+
+var dbco *sql.DB
 
 func main() {
 
-	dbco := databasecon.InitDB()
+	dbco = databasecon.InitDB()
 	defer dbco.Close()
-	fmt.Println(dbco)
 
-	// r := chi.NewRouter()
-	// r.Use(middleware.Logger)
-	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	w.Write([]byte("welcome"))
-	// })
-	// http.ListenAndServe(":3000", r)
+	var productRepository = product.Nr(dbco)
+	var productService product.Service
+	productService = product.Ns(productRepository)
+	r := chi.NewRouter()
+	r.Mount("/products", product.MakeHTTPHandler(productService))
+	http.ListenAndServe(":3000", r)
 }
