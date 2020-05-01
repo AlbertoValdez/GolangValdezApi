@@ -10,3 +10,9 @@ type Product struct {
 	ListPrice    float64 `json:"listPrice"`
 	Category     string  `json:"category"`
 }
+
+//ProductsList Estructura
+type ProductsList struct {
+	Data         []*Product `json:"data"`
+	TotalRecords int        `json:"totalRecords"`
+}
