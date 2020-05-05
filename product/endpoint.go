@@ -25,6 +25,16 @@ type getAddProductRequest struct {
 	ProductName  string
 }
 
+type updateProductRequest struct {
+	ID           int64
+	Category     string
+	Description  string
+	ListPrice    string
+	StandardCost string
+	ProductCode  string
+	ProductName  string
+}
+
 func makeGetProductByIDEndPoint(s Service) endpoint.Endpoint {
 	getProductByIDEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
 
@@ -67,4 +77,19 @@ func makeAddProductEndPoint(s Service) endpoint.Endpoint {
 
 	return addProductEndPoint
 
+}
+
+func makeUpdateProductEndPoint(s Service) endpoint.Endpoint {
+
+	updateProductEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateProductRequest)
+		r, err := s.UpdateProducts(&req)
+
+		if err != nil {
+			panic(err)
+		}
+		return r, nil
+	}
+
+	return updateProductEndPoint
 }
