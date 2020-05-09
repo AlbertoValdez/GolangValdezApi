@@ -6,6 +6,7 @@ type Service interface {
 	GetProducts(params *getProductsRequest) (*ProductsList, error)
 	InsertProducts(params *getAddProductRequest) (int64, error)
 	UpdateProducts(params *updateProductRequest) (int64, error)
+	DeleteProducts(params *deleteProductRequest) (int64, error)
 }
 
 type service struct {
@@ -42,4 +43,9 @@ func (s *service) InsertProducts(params *getAddProductRequest) (int64, error) {
 
 func (s *service) UpdateProducts(params *updateProductRequest) (int64, error) {
 	return s.repo.UpdateProducts(params)
+}
+
+func (s *service) DeleteProducts(params *deleteProductRequest) (int64, error) {
+
+	return s.repo.DeleteProducts(params)
 }
