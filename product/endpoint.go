@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 
+	"github.com/GolangValdezApi/helper"
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -39,14 +40,15 @@ type deleteProductRequest struct {
 	ProductID string
 }
 
+type getBestSellersRequest struct {
+}
+
 func makeGetProductByIDEndPoint(s Service) endpoint.Endpoint {
 	getProductByIDEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
 
 		req := request.(getProductByIDRequest)
 		product, err := s.GetProductByID(&req)
-		if err != nil {
-			panic(err)
-		}
+		helper.Catch(err)
 		return product, nil
 	}
 	return getProductByIDEndPoint
@@ -56,10 +58,7 @@ func makeGetProductsEndPoint(s Service) endpoint.Endpoint {
 	getProductsEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(getProductsRequest)
 		result, err := s.GetProducts(&req)
-		if err != nil {
-
-			panic(err)
-		}
+		helper.Catch(err)
 
 		return result, nil
 	}
@@ -72,9 +71,7 @@ func makeAddProductEndPoint(s Service) endpoint.Endpoint {
 	addProductEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(getAddProductRequest)
 		productID, error := s.InsertProducts(&req)
-		if error != nil {
-			panic(error)
-		}
+		helper.Catch(error)
 
 		return productID, nil
 	}
@@ -89,9 +86,7 @@ func makeUpdateProductEndPoint(s Service) endpoint.Endpoint {
 		req := request.(updateProductRequest)
 		r, err := s.UpdateProducts(&req)
 
-		if err != nil {
-			panic(err)
-		}
+		helper.Catch(err)
 		return r, nil
 	}
 
@@ -105,10 +100,21 @@ func makeDeleteProductEndPoint(s Service) endpoint.Endpoint {
 		req := request.(deleteProductRequest)
 		r, err := s.DeleteProducts(&req)
 
-		if err != nil {
-			panic(err)
-		}
+		helper.Catch(err)
 		return r, nil
 	}
 	return delateProductEndPoint
+}
+
+func makeBestSellersEndPoint(s Service) endpoint.Endpoint {
+
+	getBestSellersEndPoint := func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		result, err := s.GetBestSellers()
+		helper.Catch(err)
+		return result, err
+	}
+
+	return getBestSellersEndPoint
+
 }

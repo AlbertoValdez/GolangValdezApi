@@ -1,6 +1,10 @@
 package product
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/GolangValdezApi/helper"
+)
 
 //Repository interface
 type Repository interface {
@@ -10,6 +14,8 @@ type Repository interface {
 	InsertProducts(params *getAddProductRequest) (int64, error)
 	UpdateProducts(params *updateProductRequest) (int64, error)
 	DeleteProducts(params *deleteProductRequest) (int64, error)
+	getBestSellers() ([]*ProductTop, error)
+	getTotalVentas() (float64, error)
 }
 
 type repository struct {
@@ -29,9 +35,7 @@ func (repo *repository) GetProductByID(productID int) (*Product, error) {
 	row := repo.db.QueryRow(sql, productID)
 	product := &Product{}
 	err := row.Scan(&product.ID, &product.ProductCode, &product.ProductName, &product.Description, &product.StandardCost, &product.ListPrice, &product.Category)
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 
 	return product, err
 }
@@ -66,9 +70,7 @@ func (repo *repository) GetTotalProducts() (int, error) {
 	var total int
 	row := repo.db.QueryRow(sql)
 	err := row.Scan(&total)
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 	return total, nil
 }
 
@@ -78,11 +80,7 @@ func (repo *repository) InsertProducts(params *getAddProductRequest) (int64, err
 
 	result, err := repo.db.Exec(sql, params.ProductCode, params.ProductName,
 		params.Category, params.Description, params.ListPrice, params.StandardCost)
-	if err != nil {
-
-		panic(err)
-
-	}
+	helper.Catch(err)
 
 	id, _ := result.LastInsertId()
 
@@ -103,11 +101,7 @@ func (repo *repository) UpdateProducts(params *updateProductRequest) (int64, err
 
 	_, err := repo.db.Exec(sql, params.ProductCode, params.ProductName,
 		params.Category, params.Description, params.ListPrice, params.StandardCost, params.ID)
-	if err != nil {
-
-		panic(err)
-
-	}
+	helper.Catch(err)
 
 	return params.ID, nil
 }
@@ -118,15 +112,48 @@ func (repo *repository) DeleteProducts(params *deleteProductRequest) (int64, err
 
 	result, err := repo.db.Exec(sql, params.ProductID)
 
-	if err != nil {
-		panic(err)
-
-	}
+	helper.Catch(err)
 	count, err := result.RowsAffected()
-	if err != nil {
-		panic(err)
-
-	}
+	helper.Catch(err)
 
 	return count, nil
+}
+
+func (repo *repository) getBestSellers() ([]*ProductTop, error) {
+
+	const sql = `SELECT 
+						od.product_id,
+						p.product_name,
+						SUM(od.quantity*od.unit_price) vendido
+						FROM order_details od
+						inner 
+						join products p on od.product_id = p.id
+						GROUP by od.product_id
+						ORDER BY vendido desc 
+						limit 10`
+
+	result, err := repo.db.Query(sql)
+
+	helper.Catch(err)
+	var products []*ProductTop
+
+	for result.Next() {
+		product := &ProductTop{}
+		err = result.Scan(&product.ID, &product.ProductName, &product.Vendidos)
+		helper.Catch(err)
+
+		products = append(products, product)
+	}
+
+	return products, nil
+
+}
+
+func (repo *repository) getTotalVentas() (float64, error) {
+	const sql = `SELECT SUM(od.quantity*od.unit_price) vendido FROM order_details od`
+	var total float64
+	row := repo.db.QueryRow(sql)
+	err := row.Scan(&total)
+	helper.Catch(err)
+	return total, nil
 }

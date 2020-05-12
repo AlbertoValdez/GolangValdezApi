@@ -1,5 +1,7 @@
 package product
 
+import "github.com/GolangValdezApi/helper"
+
 //Service interface
 type Service interface {
 	GetProductByID(param *getProductByIDRequest) (*Product, error)
@@ -7,6 +9,7 @@ type Service interface {
 	InsertProducts(params *getAddProductRequest) (int64, error)
 	UpdateProducts(params *updateProductRequest) (int64, error)
 	DeleteProducts(params *deleteProductRequest) (int64, error)
+	GetBestSellers() (*ProductTopResponse, error)
 }
 
 type service struct {
@@ -26,13 +29,9 @@ func (s *service) GetProductByID(param *getProductByIDRequest) (*Product, error)
 func (s *service) GetProducts(params *getProductsRequest) (*ProductsList, error) {
 	product, err := s.repo.GetProducts(params)
 
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 	totalProducts, err := s.repo.GetTotalProducts()
-	if err != nil {
-		panic(err)
-	}
+	helper.Catch(err)
 
 	return &ProductsList{Data: product, TotalRecords: totalProducts}, nil
 }
@@ -48,4 +47,12 @@ func (s *service) UpdateProducts(params *updateProductRequest) (int64, error) {
 func (s *service) DeleteProducts(params *deleteProductRequest) (int64, error) {
 
 	return s.repo.DeleteProducts(params)
+}
+
+func (s *service) GetBestSellers() (*ProductTopResponse, error) {
+	products, err := s.repo.getBestSellers()
+	helper.Catch(err)
+	totalVentas, err := s.repo.getTotalVentas()
+	helper.Catch(err)
+	return &ProductTopResponse{Data: products, TotalVentas: totalVentas}, err
 }
