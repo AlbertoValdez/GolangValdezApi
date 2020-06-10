@@ -11,6 +11,7 @@ type Employee struct {
 	BusinessPhone string `json:"busniessPhone"`
 	MobilePhone   string `json:"mobilePhone"`
 	FaxNumber     string `json:"faxNumber"`
+	HomePhone     string `json:"homePhone"`
 	Address       string `json:"address"`
 }
 

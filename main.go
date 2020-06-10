@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/GolangValdezApi/costumers"
 	"github.com/GolangValdezApi/databasecon"
 	"github.com/GolangValdezApi/employee"
 	"github.com/GolangValdezApi/product"
@@ -28,19 +29,23 @@ func main() {
 	var (
 		productRepository  = product.Nr(dbco)
 		employeeRepository = employee.NewRepository(dbco)
+		costumerRepository = costumers.NewRepository(dbco)
 	)
 
 	var (
 		productService  product.Service
 		employeeService employee.Service
+		costumerService costumers.Service
 	)
 
 	productService = product.Ns(productRepository)
 	employeeService = employee.NewService(employeeRepository)
+	costumerService = costumers.NewService(costumerRepository)
 
 	r := chi.NewRouter()
 	r.Mount("/products", product.MakeHTTPHandler(productService))
 	r.Mount("/empleados", employee.MakeHTTPHandler(employeeService))
+	r.Mount("/clientes", costumers.MakeHTTPHandler(costumerService))
 
 	http.ListenAndServe(":3000", r)
 }

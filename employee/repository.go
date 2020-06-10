@@ -12,6 +12,11 @@ type Repository interface {
 	GetTotalEmployees() (int64, error)
 	GetEmployeesByID(EmployeeID int) (*Employee, error)
 	GetBestEmployee() (*BestEmployee, error)
+	AddEmployee(params *addEmployeeRequest) (int64, error)
+
+	UpdateEmployee(params *UpdateEmployeeRequest) (int64, error)
+
+	GetDelateEmployee(params *getDeleteEmployeesByIDRequest) (int64, error)
 }
 
 type repository struct {
@@ -85,5 +90,54 @@ func (repo *repository) GetBestEmployee() (*BestEmployee, error) {
 	helper.Catch(err)
 
 	return bestEmployee, nil
+
+}
+
+func (repo *repository) AddEmployee(params *addEmployeeRequest) (int64, error) {
+
+	const sql = `INSERT INTO employees (first_name,last_name,company,email_address,job_title,business_phone,mobile_phone,fax_number,address)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?,? )`
+
+	result, err := repo.db.Exec(sql, params.FIrtsName, params.LastName, params.Company, params.EmailAddress, params.JobTittle, params.BusinessPhone, params.MobilePhone, params.FaxNumber, params.Address)
+	helper.Catch(err)
+
+	id, err := result.LastInsertId()
+	helper.Catch(err)
+	return id, nil
+
+}
+
+func (repo *repository) UpdateEmployee(params *UpdateEmployeeRequest) (int64, error) {
+
+	const sql = `UPDATE   employees SET 
+				first_name = ?,
+				last_name =  ?,
+				company  =   ?,
+				email_address = ?,
+				job_title = ?,
+				business_phone = ?,
+				mobile_phone = ?,
+				fax_number = ?,
+				home_phone = ?, 
+				address = ? 
+				WHERE id = ?`
+
+	_, err := repo.db.Exec(sql, params.FIrtsName, params.LastName, params.Company, params.EmailAddress, params.JobTittle, params.BusinessPhone, params.MobilePhone, params.FaxNumber, params.HomePhone, params.Address, params.ID)
+	helper.Catch(err)
+	id := params.ID
+	return id, nil
+
+}
+
+func (repo *repository) GetDelateEmployee(params *getDeleteEmployeesByIDRequest) (int64, error) {
+
+	const sql = `DELETE FROM employees WHERE id = ? `
+	result, err := repo.db.Exec(sql, params.EmployeeID)
+	helper.Catch(err)
+
+	count, err := result.RowsAffected()
+	helper.Catch(err)
+
+	return count, nil
 
 }
